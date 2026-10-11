@@ -37,8 +37,23 @@ function placeholder(face, item) {
 function cardVisual(item) {
   const face = document.createElement('div'); face.className = 'art';
   face.style.setProperty('--accent', colors[String(item.rarity).toLowerCase()] || '#b6aaa0');
-  // Изображения из закрытого альбома будут подключены отдельно.
-  placeholder(face,item);
+  const url = String(item.imageUrl || '');
+  if (/^https:\/\/res\.cloudinary\.com\/jlcfrihy\/image\/upload\//.test(url)) {
+    const image = document.createElement('img');
+    image.src = url;
+    image.alt = `Карточка «${item.name}», №${item.id}`;
+    image.loading = 'lazy';
+    image.decoding = 'async';
+    face.style.padding = '0';
+    image.addEventListener('error', () => {
+      image.remove();
+      face.style.padding = '';
+      placeholder(face, item);
+    }, {once:true});
+    face.append(image);
+  } else {
+    placeholder(face,item);
+  }
   return face;
 }
 function render() {
